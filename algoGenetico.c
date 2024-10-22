@@ -151,22 +151,43 @@ struct pop *gerarVetorPop(double Dist[][10], int tamanhoVetorPop) {
     return populacao;
 }
 
+void Cruzamento(int *indivA, int *indivB, int *novoIndiv, double Dist[10][10]) {
+    int tamanhoIndiv = 10;  // Tamanho do indivíduo
+    int pontoCruzamento = rand() % (tamanhoIndiv - 1);  // Escolhe um ponto de cruzamento aleatório
 
+    // Realiza o cruzamento
+    for (int i = 0; i <= pontoCruzamento; i++) {
+        novoIndiv[i] = indivA[i];  // Copia genes de A até o ponto de cruzamento
+    }
+    for (int i = pontoCruzamento + 1; i < tamanhoIndiv; i++) {
+        novoIndiv[i] = indivB[i];  // Copia genes de B após o ponto de cruzamento
+    }
 
-void novasGeracoes(){
-	int A;
-	int B;
-	
-	for(int i = 1; i < 100; i++){
-		//Calcula o custo total
-		custoTotal(populacao, tamanhoVetorPop);
-		
-		for(int j = 1; j < 40; j++){
-			A = roleta();
-			B = roleta();
-			//fazer a funcao cruzamento com PathRelinking
-		}
-	}
+    // Calcula o valor do novo indivíduo
+    // Você pode chamar a função aqui para calcular a soma, se necessário
+    // novoIndiv->valor = gerarSomaValor(novoIndiv, tamanhoIndiv, Dist);
+}
+
+void Mutacao(struct pop *populacao, int tamanhoVetorPop, double Dist[10][10]) {
+    // Define a taxa de mutação (ex: 10%)
+    double taxaMutacao = 0.1;
+
+    for (int i = 0; i < tamanhoVetorPop; i++) {
+        for (int j = 0; j < 10; j++) {
+            // Decide se deve mutar esse bit
+            if ((rand() / (double)RAND_MAX) < taxaMutacao) {
+                // Mutação bitwise: inverte o bit
+                populacao[i].indiv[j] ^= 1; // Usando XOR para inverter o bit
+            }
+        }
+    }
+
+    // Atualiza o valor da nova solução se necessário
+    for (int i = 0; i < tamanhoVetorPop; i++) {
+        populacao[i].valor = gerarSomaValor(populacao[i].indiv, 10, Dist);
+    }
+
+    printf("Mutação bitwise aplicada na população.\n");
 }
 
 //Receber como parâmetro o vetor população ordenado
@@ -180,6 +201,35 @@ double custoTotal(struct pop *populacao, int tamanho){
     return custoTotal;
 }
 
+void novasGeracoes(struct pop *populacao, double Dist[10][10], int tamanhoVetorPop){
+	struct pop populacao2[40];  // Nova população para armazenar os 40 últimos elementos
+	int A;
+	int B;
+	
+	for(int i = 1; i < 100; i++){
+		//Calcula o custo total
+		double custoTotalValor=custoTotal(populacao, tamanhoVetorPop);
+		
+		for(int j = 1; j < 40; j++){
+			A = roleta(custoTotalValor, populacao);  // Seleciona A por roleta
+            B = roleta(custoTotalValor, populacao);  // Seleciona B por roleta
+
+            // Realiza o cruzamento entre A e B e armazena o resultado em populacao2[j]
+            Cruzamento(populacao[A].indiv, populacao[B].indiv, populacao2[j].indiv, Dist);
+            populacao2[j].valor = gerarSomaValor(populacao2[j].indiv, 10, Dist); // Atualiza o valor
+        }
+        for (int k = 0; k < 40; k++) {
+            populacao[tamanhoVetorPop - 40 + k] = populacao2[k];
+        }
+        qsort(populacao, tamanhoVetorPop, sizeof(struct pop), compararPopulacao);
+
+		}
+	
+	qsort(populacao, 100, sizeof(struct pop), compararPopulacao);
+    Mutacao(populacao, tamanhoVetorPop, Dist);
+	}
+
+
 int main() {
 	srand(time(NULL));
     int tamanhoMax = 10;
@@ -192,12 +242,13 @@ int main() {
     
     //População de 100 indiv criada
     struct pop *populacao = gerarVetorPop(Dist, tamanhoVetorPop);
-    
-    //População de 100 indiv ordenada do menor para o maior custo
+        //População de 100 indiv ordenada do menor para o maior custo
     qsort(populacao, 100, sizeof(struct pop), compararPopulacao);
     
     //Imprime a população ordenada
     imprimirPopulacao(populacao, tamanhoVetorPop);
     
+    novasGeracoes(populacao,Dist,tamanhoMax);
+
     free(pontos);
 }
