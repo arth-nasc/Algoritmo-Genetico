@@ -151,7 +151,7 @@ struct pop *gerarVetorPop(double Dist[][10], int tamanhoVetorPop) {
     return populacao;
 }
 
-void Cruzamento(int *indivA, int *indivB, int *novoIndiv, double Dist[10][10]) {
+void Cruzamento(int *A, int *B, int *novoIndiv, double Dist[10][10]) {
     int tamanhoIndiv = 10;  // Tamanho do indivíduo
     int pontoCruzamento = rand() % (tamanhoIndiv - 1);  // Escolhe um ponto de cruzamento aleatório
 
@@ -163,10 +163,13 @@ void Cruzamento(int *indivA, int *indivB, int *novoIndiv, double Dist[10][10]) {
         novoIndiv[i] = indivB[i];  // Copia genes de B após o ponto de cruzamento
     }
 
-    // Calcula o valor do novo indivíduo
-    // Você pode chamar a função aqui para calcular a soma, se necessário
-    // novoIndiv->valor = gerarSomaValor(novoIndiv, tamanhoIndiv, Dist);
-}
+} //cruzamento em x nao funciona no caso, usar outro cruzamento
+// usar pathrelinking. 
+// fixa um pai e vai alterando um-a-um o pai de baixo até ficar no indice igual ao pai de cima, atraves de swaps.
+// toda vez coloca no temp se for maior salve abaixo.
+// vai-se comparando o res. do vetor pai e com vetor filho.
+// fazer 40 vezes, dentro de um laço de 100 vezes.
+// deve-se reordenar a pop.
 
 void Mutacao(struct pop *populacao, int tamanhoVetorPop, double Dist[10][10]) {
     // Define a taxa de mutação (ex: 10%)
